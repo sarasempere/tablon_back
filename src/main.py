@@ -8,7 +8,9 @@ from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, User
+from models import db, User, Photo
+import base64
+import codecs
 #from models import Person
 
 app = Flask(__name__)
@@ -38,6 +40,37 @@ def handle_hello():
     }
 
     return jsonify(response_body), 200
+
+
+@app.route('/userphoto', methods=['POST'])
+def photo_post():
+   file = request.files['archivo'].read()
+   encoded_string = base64.b64encode(request.files['archivo'].read())
+   b = bytearray(file)
+   txt_b64 = base64.b64encode(b)
+   c = base64.encodestring(txt_b64)
+   txt_b64_string = c.decode('utf-8')
+   #print(txt_b64)
+   new_photo=Photo(data = txt_b64_string)
+   db.session.add(new_photo)  
+   db.session.commit()   
+
+   return "save "  + " to the DB"
+
+@app.route('/imagen', methods=['GET'])
+def get_photo():
+    photos = Photo.query.all()
+    photo=photos[1].data
+    b1 = photo.decode("utf-8")
+    d = base64.b64decode(b1)
+    s2 = d.decode("utf-8")
+    print(type(photo))
+    print(s2)
+    #print(d)
+    return jsonify({"data":s2})
+    
+
+  
 
 # this only runs if `$ python src/main.py` is executed
 if __name__ == '__main__':
