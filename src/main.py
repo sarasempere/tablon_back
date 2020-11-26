@@ -44,6 +44,7 @@ def handle_hello():
 
 @app.route('/userphoto', methods=['POST'])
 def photo_post():
+   print(request.form.get('lat')) 
    file = request.files['archivo'].read()
    encoded_string = base64.b64encode(request.files['archivo'].read())
    b = bytearray(file)
@@ -51,7 +52,7 @@ def photo_post():
    c = base64.encodestring(txt_b64)
    txt_b64_string = c.decode('utf-8')
    #print(txt_b64)
-   new_photo=Photo(data = txt_b64_string)
+   new_photo=Photo(data = txt_b64_string, latitude=request.form.get('lat'), longitude=request.form.get('long'))
    db.session.add(new_photo)  
    db.session.commit()   
 
@@ -60,7 +61,7 @@ def photo_post():
 @app.route('/imagen', methods=['GET'])
 def get_photo():
     photos = Photo.query.all()
-    photo=photos[1].data
+    photo=photos[0].data
     b1 = photo.decode("utf-8")
     d = base64.b64decode(b1)
     s2 = d.decode("utf-8")
